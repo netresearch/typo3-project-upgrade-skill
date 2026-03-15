@@ -1,7 +1,7 @@
 {
     "name": "netresearch/typo3-project-upgrade-skill",
     "description": "Claude Code skill for upgrading deployed TYPO3 project instances across major versions",
-    "type": "claude-skill",
+    "type": "ai-agent-skill",
     "license": ["MIT", "CC-BY-SA-4.0"],
     "authors": [
         {
@@ -10,15 +10,10 @@
             "homepage": "https://www.netresearch.de"
         }
     ],
-    "require": {},
+    "require": {
+        "netresearch/composer-agent-skill-plugin": "*"
+    },
     "extra": {
-        "claude-skill": {
-            "skills": {
-                "typo3-project-upgrade": {
-                    "description": "Use when upgrading a deployed TYPO3 project/instance to a new LTS version",
-                    "path": "skills/typo3-project-upgrade"
-                }
-            }
-        }
+        "ai-agent-skill": "skills/typo3-project-upgrade/SKILL.md"
     }
 }
