@@ -1,0 +1,12 @@
+{
+    "name": "typo3-project-upgrade",
+    "version": "1.0.0",
+    "description": "Skill for upgrading deployed TYPO3 project instances across major LTS versions",
+    "skills": [
+        {
+            "name": "typo3-project-upgrade",
+            "path": "skills/typo3-project-upgrade/SKILL.md",
+            "description": "Use when upgrading a deployed TYPO3 project/instance to a new LTS version — migrating site configuration, TypoScript, templates, Docker infrastructure, and database. Not for extension code upgrades (use typo3-extension-upgrade instead)."
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "name": "netresearch/typo3-project-upgrade-skill",
+    "description": "Claude Code skill for upgrading deployed TYPO3 project instances across major versions",
+    "type": "claude-skill",
+    "license": ["MIT", "CC-BY-SA-4.0"],
+    "authors": [
+        {
+            "name": "Netresearch DTT GmbH",
+            "email": "info@netresearch.de",
+            "homepage": "https://www.netresearch.de"
+        }
+    ],
+    "require": {},
+    "extra": {
+        "claude-skill": {
+            "skills": {
+                "typo3-project-upgrade": {
+                    "description": "Use when upgrading a deployed TYPO3 project/instance to a new LTS version",
+                    "path": "skills/typo3-project-upgrade"
+                }
+            }
+        }
+    }
+}
