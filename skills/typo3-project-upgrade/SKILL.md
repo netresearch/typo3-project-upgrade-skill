@@ -5,61 +5,74 @@ description: "Use when upgrading a deployed TYPO3 project/instance to a new LTS 
 
 # TYPO3 Project Upgrade
 
-Systematic approach for upgrading deployed TYPO3 project instances across major versions.
-
-> **Scope**: Project-level upgrades (site config, TypoScript, templates, infrastructure, DB).
-> For extension code upgrades, use `typo3-extension-upgrade`.
-
-## When to Use
-
-- Upgrading a TYPO3 website from one LTS to another (v11→v12, v12→v13, v13→v14)
-- Migrating sys_template records to Site Sets (v13+)
-- Upgrading Bootstrap Package across major versions (v12→v14→v16)
-- Migrating BS4→BS5 styling
-
-## Migration Phases
-
-1. **Inventory** — 2. **Infrastructure** — 3. **Site Sets** — 4. **Visual Parity** — 5. **Review Cycles**
+Phases: **Inventory** -> **Infrastructure** -> **Site Sets** -> **Visual Parity** -> **Review**
 
 ## Phase 1: Inventory
 
-Before touching code, document what exists: sys_template records (`root`, `include_static_file`, constants, config), content element types, installed extensions.
+Query sys_template (uid, pid, root, include_static_file), tt_content CType distribution, extension list. Document all root=1 templates and their TypoScript constants/config.
 
-## Phase 2: Infrastructure (Docker)
+## Phase 2: Infrastructure
 
-TYPO3 needs ImageMagick — without it, ALL images serve unprocessed originals (10-30x larger). Install it, configure GFX settings, then `TRUNCATE sys_file_processedfile` and clear `_processed_/`.
+**ImageMagick required** — without it ALL images serve unprocessed originals (10-30x size). Install in Docker (`apk add imagemagick` / `apt-get install imagemagick`). Configure GFX processor in `config/system/settings.php`. After adding: `TRUNCATE sys_file_processedfile`, `rm -rf public/fileadmin/_processed_/*`, `cache:flush`.
 
-## Phase 3: sys_template → Site Sets (v13+)
+## Phase 3: sys_template to Site Sets (v13+)
 
-Structure: `packages/my-site/Configuration/Sets/MySite/` with `config.yaml`, `settings.yaml`, `setup.typoscript`, optional `constants.typoscript`.
+Structure: `packages/my-site/Configuration/Sets/MySite/` with config.yaml, settings.yaml, setup.typoscript.
 
-**config.yaml** — declare dependencies (e.g. `bootstrap-package/full`, `georgringer/news`). Reference from site config's `dependencies`.
+**config.yaml**: name, label, dependencies (e.g. `bootstrap-package/full`).
 
-**CRITICAL**: Delete ALL sys_template records when using site sets. A surviving `root=1` template with `include_static_file` overrides site sets, causing "No page configured for type=0".
+**Site config** (`config/sites/default/config.yaml`): add `dependencies: [vendor/my-site]`.
 
-**settings.yaml** — map old TypoScript constants to new settings. SCSS variables via `plugin.bootstrap_package.settings.scss.*` (colors, link-decoration, min-contrast-ratio, navbar colors). Prefer SCSS variables over CSS overrides — check BS5 `_variables.scss` for `!default` variables.
+**CRITICAL**: `DELETE FROM sys_template` — ALL records. A surviving root=1 template with `include_static_file` overrides site sets, causing "No page configured for type=0". Common mistake: only checking `config` column while `include_static_file` also conflicts.
 
-**Per-page behavior**: Use TypoScript conditions (`[traverse(page, "uid") == X]`) instead of per-page sys_template records.
+**settings.yaml** — map old constants (page.logo.file, page.theme.navigation.style, page.theme.breadcrumb.enable) directly.
 
-## Phase 4: Bootstrap Package v12→v16 / BS4→BS5
+### SCSS Variable Injection
 
-**Contrast**: BS5 `color-contrast()` with `min-contrast-ratio: 4.5` may change text colors. Set to `3` to restore v11 behavior. Cards inside colored frames need CSS variable overrides.
+BS Package injects ALL `plugin.bootstrap_package.settings.scss.*` as SCSS variables — even unlisted ones. Prefer over CSS overrides:
 
-**Navigation**: Split link/button for dropdowns (accessibility). Hover dropdowns removed (restore via CSS on `.nav-item:hover > .dropdown-menu`).
+```yaml
+plugin.bootstrap_package.settings.scss.primary: '#585961'
+plugin.bootstrap_package.settings.scss.secondary: '#2f99a4'
+plugin.bootstrap_package.settings.scss.link-decoration: 'none'
+plugin.bootstrap_package.settings.scss.min-contrast-ratio: '3'
+```
 
-**Sticky header flicker** ([#1468](https://github.com/benjaminkott/bootstrap_package/issues/1468)): Changed from `fixed` to `sticky`. Compensate height change with `margin-bottom`.
+Check BS5 `_variables.scss` for available `!default` variables.
 
-**Accept these BS5 changes**: split nav link/button, `data-bs-*` attributes, individual JS/CSS files, 3 skip links, page title site name suffix.
+### Per-Page Behavior
 
-## Phase 5: Review Methodology
+Replace per-page sys_templates with TypoScript conditions: `[traverse(page, "uid") == 99]`.
 
-Compare old vs new site structurally (HTTP status, content element IDs, frame classes, processed images). Categorize differences as MIGRATION GAP (fix), BS5 CHANGE (accept), or CSS OVERRIDE NEEDED (document).
+## Phase 4: BS Package v12-v16 / BS4-BS5
+
+**Color contrast**: `min-contrast-ratio: 4.5` (BS5 default) changes text colors vs v11. Set to `3` to restore v11 behavior.
+
+**Cards in colored frames** inherit white text (invisible on white bg). Fix with CSS custom properties:
+```css
+.frame-background-secondary .card {
+    --frame-color: var(--bs-body-color);
+}
+```
+
+**Navigation**: split `<a>` into `<a class="nav-link-main">` + `<button class="nav-link-toggle">` (accessibility). Hover dropdowns removed — restore with `:hover > .dropdown-menu { display: block }` scoped to nav-style-simple/mega.
+
+**Scroll flicker** ([#1468](https://github.com/benjaminkott/bootstrap_package/issues/1468)): sticky navbar transition changes document height. Fix with `margin-bottom` compensation (default-height minus transition-height).
+
+**Accept** (do not fight): split nav link/button, data-bs-* attributes, 3 skip links, individual JS/CSS files, frame-height-default class.
+
+## Phase 5: Review
+
+Compare old/new sites with curl (HTTP status, content element IDs, frame classes, _processed_ count). Categorize differences as **MIGRATION GAP** (fix), **BS5 CHANGE** (accept), or **CSS OVERRIDE** (document why).
+
+**DB fixes**: carousel autoplay (BS Package v16 defaults off) via pi_flexform UPDATE.
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---|---|
-| CSS hacks instead of SCSS variables | Use `plugin.bootstrap_package.settings.scss.*` |
-| Incomplete sys_template deletion | Check ALL columns or `DELETE FROM sys_template` |
-| Missing ImageMagick in Docker | Images serve unprocessed (10-30x size) |
-| Fighting BS5 accessibility changes | Accept split nav, skip links, semantic HTML |
+| CSS hacks instead of SCSS variables | Override via `plugin.bootstrap_package.settings.scss.*` |
+| Partial sys_template cleanup | `DELETE FROM sys_template` (all columns matter) |
+| Missing ImageMagick in Docker | 10-30x image file sizes |
+| Fighting BS5 accessibility | Accept split nav, skip links, semantic HTML |
+| position:fixed for scroll flicker | Use margin-bottom compensation |
