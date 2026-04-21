@@ -5,7 +5,7 @@ description: "Use when upgrading a deployed TYPO3 project/instance to a new LTS 
 
 # TYPO3 Project Upgrade
 
-Phases: **Inventory** -> **Infrastructure** -> **Site Sets** -> **Visual Parity** -> **Review** -> **v14-specific post-upgrade** (Phase 6, only when target is v14)
+Phases: **Inventory** -> **Infrastructure** -> **Site Sets** -> **Visual Parity** -> **Review** (+ **Phase 6** for v14 targets)
 
 ## Phase 1: Inventory
 
