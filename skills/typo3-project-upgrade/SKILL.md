@@ -59,7 +59,7 @@ Replace per-page sys_templates with TypoScript conditions: `[traverse(page, "uid
 
 **Scroll flicker** ([#1468](https://github.com/benjaminkott/bootstrap_package/issues/1468)): sticky navbar transition changes document height. Fix with `margin-bottom` compensation (default-height minus transition-height).
 
-**Accept**: split nav link/button, data-bs-* attributes, 3 skip links, individual JS/CSS files, frame-height-default class.
+**Accept**: split nav link/button, data-bs-*, 3 skip links, individual JS/CSS, frame-height-default class.
 
 ## Phase 5: Review
 
