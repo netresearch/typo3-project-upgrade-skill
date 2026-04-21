@@ -5,7 +5,7 @@ description: "Use when upgrading a deployed TYPO3 project/instance to a new LTS 
 
 # TYPO3 Project Upgrade
 
-Phases: **Inventory** -> **Infrastructure** -> **Site Sets** -> **Visual Parity** -> **Review**
+Phases: **Inventory** -> **Infrastructure** -> **Site Sets** -> **Visual Parity** -> **Review** -> **v14-specific post-upgrade** (Phase 6, only when target is v14)
 
 ## Phase 1: Inventory
 
@@ -69,7 +69,7 @@ Compare old/new sites with curl (HTTP status, content element IDs, frame classes
 
 ## Phase 6: v14-specific post-upgrade
 
-- **#109585 wizard** (mandatory if transited v14.2): Install Tool → Upgrade Wizards
+- **#109585 wizard** (mandatory if the instance ever ran v14.2): Install Tool → Upgrade Wizards
 - **`composer.json` required** in classic mode (#108310)
 - **HMAC rotation** SHA1 → SHA256 (#106307)
 - **Camino theme** optional (v14.1+, #108539)

@@ -105,7 +105,7 @@ New opt-in required:
 
 - `Configuration/Backend/Modules.php`
 - `Configuration/Backend/Routes.php`
-- `Configuration/TCA/Overrides/be_users.php` (`addUserSetting()`)
+- `ext_localconf.php` (`ExtensionManagementUtility::addUserSetting()` — the Setup module API, not a TCA override)
 - `Configuration/TCA/Overrides/pages.php` (`allowedRecordTypes`)
 
 ## 10. Smoke tests after cutover
@@ -121,7 +121,7 @@ ls public/fileadmin/_processed_/ | wc -l
 grep -ic deprecat var/log/typo3_*.log
 
 # DB: no leftover sys_template root=1 records
-typo3 database:query "SELECT uid, pid, title FROM sys_template WHERE root=1 AND deleted=0"
+ddev mysql -e "SELECT uid, pid, title FROM sys_template WHERE root=1 AND deleted=0"  # or: mysql -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} -e '...'
 ```
 
 ## 11. LTS support window (operational)
@@ -143,5 +143,5 @@ typo3 database:query "SELECT uid, pid, title FROM sys_template WHERE root=1 AND 
 - [Important #109585 — Serialized credential data](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.3/Important-109585-SerializedCredentialDataInBeUsersDatabaseTable.html)
 - [Deprecation #109438 — ext_tables.php](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.3/Deprecation-109438-ExtTablesPhpInExtensions.html)
 - [Feature #108539 — Camino default theme](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.1/Feature-108539-Default-Theme-Camino.html)
-- [Feature #107536 — Install Tool backend routing](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.0/Important-107536-InstallToolNowAdaptsToBackendLoginRouting.html)
+- [Important #107536 — Install Tool backend routing](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.0/Important-107536-InstallToolNowAdaptsToBackendLoginRouting.html)
 - [TYPO3 Maintenance Release Schedule](https://typo3.com/typo3-cms/development-roadmap/maintenance-releases)
