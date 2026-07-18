@@ -1,11 +1,11 @@
 ---
 name: typo3-project-upgrade
-description: "Use when upgrading a deployed TYPO3 project/instance to a new LTS version — migrating site configuration, TypoScript, templates, Docker infrastructure, and database. Not for extension code upgrades (use typo3-extension-upgrade instead)."
+description: "Use when upgrading a deployed TYPO3 project/instance to a new LTS version (v14.3 LTS is the current target, released 2026-04-21) — migrating site configuration, TypoScript, templates, Docker infrastructure, and database. Includes #109585 post-upgrade wizard and Camino theme migration. Not for extension code upgrades (use typo3-extension-upgrade instead)."
 ---
 
 # TYPO3 Project Upgrade
 
-Phases: **Inventory** -> **Infrastructure** -> **Site Sets** -> **Visual Parity** -> **Review**
+Phases: **Inventory** -> **Infrastructure** -> **Site Sets** -> **Visual Parity** -> **Review** (+ **Phase 6** for v14 targets)
 
 ## Phase 1: Inventory
 
@@ -13,7 +13,7 @@ Query sys_template (uid, pid, root, include_static_file), tt_content CType distr
 
 ## Phase 2: Infrastructure
 
-**ImageMagick required** — without it ALL images serve unprocessed originals (10-30x size). Install in Docker (`apk add imagemagick` / `apt-get install imagemagick`). Configure GFX processor in `config/system/settings.php`. After adding: `TRUNCATE sys_file_processedfile`, `rm -rf public/fileadmin/_processed_/*`, `cache:flush`.
+**ImageMagick required** — without it, ALL images serve unprocessed originals (10-30x size). Install in Docker, configure GFX processor in `config/system/settings.php`, then `TRUNCATE sys_file_processedfile`, `rm -rf public/fileadmin/_processed_/*`, `cache:flush`.
 
 ## Phase 3: sys_template to Site Sets (v13+)
 
@@ -59,13 +59,22 @@ Replace per-page sys_templates with TypoScript conditions: `[traverse(page, "uid
 
 **Scroll flicker** ([#1468](https://github.com/benjaminkott/bootstrap_package/issues/1468)): sticky navbar transition changes document height. Fix with `margin-bottom` compensation (default-height minus transition-height).
 
-**Accept** (do not fight): split nav link/button, data-bs-* attributes, 3 skip links, individual JS/CSS files, frame-height-default class.
+**Accept**: split nav link/button, data-bs-*, 3 skip links, individual JS/CSS, frame-height-default class.
 
 ## Phase 5: Review
 
 Compare old/new sites with curl (HTTP status, content element IDs, frame classes, _processed_ count). Categorize differences as **MIGRATION GAP** (fix), **BS5 CHANGE** (accept), or **CSS OVERRIDE** (document why).
 
 **DB fixes**: carousel autoplay (BS Package v16 defaults off) via pi_flexform UPDATE.
+
+## Phase 6: v14 post-upgrade
+
+- **#109585 wizard** (if instance ever ran v14.2): Install Tool → Upgrade Wizards
+- **`composer.json` required** in classic mode (#108310)
+- **HMAC rotation** SHA1 → SHA256 (#106307)
+- **Camino theme** optional (v14.1+, #108539)
+
+See `references/v13-to-v14-project-upgrade.md`.
 
 ## Common Mistakes
 
