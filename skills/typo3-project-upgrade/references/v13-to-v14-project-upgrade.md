@@ -38,6 +38,34 @@ composer update -W --with-all-dependencies
 - v14 requires a `composer.json` in classic mode (#108310). Composer projects already have one.
 - `ext_emconf.php` is deprecated for extension metadata (#108345) — not your concern here, but any local extension with only `ext_emconf.php` should be flagged to the extension team.
 
+### nr-image-optimize: check what is left before you upgrade it
+
+Most of what this extension was installed for became core during the v14 cycle. Verified against the 14.3 source, not against release notes:
+
+| What it was installed for | Core 14 |
+|---|---|
+| WebP/AVIF output for processed images | `GFX/imageFileConversionFormats`, core since **14.0** (`GraphicalFunctions::…`) |
+| Responsive `srcset` with width descriptors (`400w`) | `f:image.srcset`, core since **14.2** (Feature #102215) |
+| Retina / high-DPI variants (`2x`) | same ViewHelper — the density descriptor is what "Retina" means |
+| `<source srcset=…>` inside `<picture>` | shown as an intended use in that feature's own changelog |
+
+What core still does **not** have, and the only reasons to keep the extension:
+
+- **lossless post-optimisation** — optipng, jpegoptim, gifsicle. No equivalent anywhere in core.
+- **on-demand generation through a `/processed/` middleware** — core generates variants while rendering, not on request. If a project depends on that delivery architecture, it is an architecture decision, not an image-format one.
+
+Convenience, not capability: the extension's `SourceSetViewHelper` emits the whole `<picture>` block in one tag. With core you assemble `<picture>` in Fluid around `f:image.srcset`. That is markup you write once, not a feature you lose.
+
+Note that "we need it for Retina and WebP" was a correct argument under v12/v13 and stopped being one in 14.2. Expect to meet it in existing project plans written before that release — check the version the argument was made against.
+
+Set the format conversion in `additional.php`:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['GFX']['imageFileConversionFormats'] = ['svg' => 'svg', 'default' => 'webp'];
+```
+
+The encoders still have to exist in the image: imagick and GD both built with WebP and AVIF, and AVIF needs ImageMagick's HEIF coder. Without a working AVIF delegate ImageMagick writes an empty `.avif` instead of failing, so assert real bytes rather than capability flags.
+
 ## 3. Site Sets (v13+ — unchanged in v14)
 
 If the v13 site already uses Site Sets, no changes needed. Site configurations are now included in `site:show` import/export (Feature #109340 lands in v14.2). Route enhancers can now ship inside Site Sets (Feature #107837 in v14.1).
