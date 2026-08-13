@@ -38,6 +38,22 @@ composer update -W --with-all-dependencies
 - v14 requires a `composer.json` in classic mode (#108310). Composer projects already have one.
 - `ext_emconf.php` is deprecated for extension metadata (#108345) — not your concern here, but any local extension with only `ext_emconf.php` should be flagged to the extension team.
 
+### Extensions that v14 makes obsolete
+
+Drop these rather than upgrading them — the core took over what they were installed for:
+
+| Extension | Superseded by | Keep it only if |
+|---|---|---|
+| `netresearch/nr-image-optimize` | `GFX/imageFileConversionFormats` (core since 14.0) delivers WebP/AVIF for every processed image | the project needs a real `<picture>` format fallback, quality steps per URL, or lossless optimisation (optipng/gifsicle/jpegoptim) |
+
+Measured on the Netresearch demo instance: core conversion alone produced about −81 % (1.47 MB → 285 KB) with no extension and no template change. Set it in `additional.php`:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['GFX']['imageFileConversionFormats'] = ['svg' => 'svg', 'default' => 'webp'];
+```
+
+The encoders still have to exist in the image: imagick and GD both built with WebP and AVIF, and AVIF needs ImageMagick's HEIF coder. Without a working AVIF delegate ImageMagick writes an empty `.avif` instead of failing, so assert real bytes rather than capability flags.
+
 ## 3. Site Sets (v13+ — unchanged in v14)
 
 If the v13 site already uses Site Sets, no changes needed. Site configurations are now included in `site:show` import/export (Feature #109340 lands in v14.2). Route enhancers can now ship inside Site Sets (Feature #107837 in v14.1).
