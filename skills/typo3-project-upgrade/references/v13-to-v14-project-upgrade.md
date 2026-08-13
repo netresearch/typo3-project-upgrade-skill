@@ -38,17 +38,27 @@ composer update -W --with-all-dependencies
 - v14 requires a `composer.json` in classic mode (#108310). Composer projects already have one.
 - `ext_emconf.php` is deprecated for extension metadata (#108345) — not your concern here, but any local extension with only `ext_emconf.php` should be flagged to the extension team.
 
-### Extensions whose motive v14 may have absorbed
+### nr-image-optimize: check what is left before you upgrade it
 
-Ask what each was installed FOR before budgeting an upgrade for it. Where the core now does that job, the extension is cost without benefit — but the same extension can still be load-bearing in the next project, so this is a per-project question, not a rule.
+Most of what this extension was installed for became core during the v14 cycle. Verified against the 14.3 source, not against release notes:
 
-| Extension | Core now covers | It still earns its place when |
-|---|---|---|
-| `netresearch/nr-image-optimize` | plain format conversion: `GFX/imageFileConversionFormats` (core since 14.0) delivers WebP/AVIF for every processed image | the site needs retina/srcset variants, a real `<picture>` format fallback, quality steps per URL, or lossless optimisation (optipng/gifsicle/jpegoptim) |
+| What it was installed for | Core 14 |
+|---|---|
+| WebP/AVIF output for processed images | `GFX/imageFileConversionFormats`, core since **14.0** (`GraphicalFunctions::…`) |
+| Responsive `srcset` with width descriptors (`400w`) | `f:image.srcset`, core since **14.2** (Feature #102215) |
+| Retina / high-DPI variants (`2x`) | same ViewHelper — the density descriptor is what "Retina" means |
+| `<source srcset=…>` inside `<picture>` | shown as an intended use in that feature's own changelog |
 
-Both outcomes are real and current: one v14 instance dropped it because plain conversion was the only motive, while the netresearch.de v14 relaunch keeps it deliberately for the retina and `/processed` pipeline. Decide it, do not inherit it.
+What core still does **not** have, and the only reasons to keep the extension:
 
-Measured on the Netresearch demo instance: core conversion alone produced about −81 % (1.47 MB → 285 KB) with no extension and no template change. Set it in `additional.php`:
+- **lossless post-optimisation** — optipng, jpegoptim, gifsicle. No equivalent anywhere in core.
+- **on-demand generation through a `/processed/` middleware** — core generates variants while rendering, not on request. If a project depends on that delivery architecture, it is an architecture decision, not an image-format one.
+
+Convenience, not capability: the extension's `SourceSetViewHelper` emits the whole `<picture>` block in one tag. With core you assemble `<picture>` in Fluid around `f:image.srcset`. That is markup you write once, not a feature you lose.
+
+Note that "we need it for Retina and WebP" was a correct argument under v12/v13 and stopped being one in 14.2. Expect to meet it in existing project plans written before that release — check the version the argument was made against.
+
+Set the format conversion in `additional.php`:
 
 ```php
 $GLOBALS['TYPO3_CONF_VARS']['GFX']['imageFileConversionFormats'] = ['svg' => 'svg', 'default' => 'webp'];
