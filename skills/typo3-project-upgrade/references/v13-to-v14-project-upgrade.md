@@ -38,13 +38,15 @@ composer update -W --with-all-dependencies
 - v14 requires a `composer.json` in classic mode (#108310). Composer projects already have one.
 - `ext_emconf.php` is deprecated for extension metadata (#108345) — not your concern here, but any local extension with only `ext_emconf.php` should be flagged to the extension team.
 
-### Extensions that v14 makes obsolete
+### Extensions whose motive v14 may have absorbed
 
-Drop these rather than upgrading them — the core took over what they were installed for:
+Ask what each was installed FOR before budgeting an upgrade for it. Where the core now does that job, the extension is cost without benefit — but the same extension can still be load-bearing in the next project, so this is a per-project question, not a rule.
 
-| Extension | Superseded by | Keep it only if |
+| Extension | Core now covers | It still earns its place when |
 |---|---|---|
-| `netresearch/nr-image-optimize` | `GFX/imageFileConversionFormats` (core since 14.0) delivers WebP/AVIF for every processed image | the project needs a real `<picture>` format fallback, quality steps per URL, or lossless optimisation (optipng/gifsicle/jpegoptim) |
+| `netresearch/nr-image-optimize` | plain format conversion: `GFX/imageFileConversionFormats` (core since 14.0) delivers WebP/AVIF for every processed image | the site needs retina/srcset variants, a real `<picture>` format fallback, quality steps per URL, or lossless optimisation (optipng/gifsicle/jpegoptim) |
+
+Both outcomes are real and current: one v14 instance dropped it because plain conversion was the only motive, while the netresearch.de v14 relaunch keeps it deliberately for the retina and `/processed` pipeline. Decide it, do not inherit it.
 
 Measured on the Netresearch demo instance: core conversion alone produced about −81 % (1.47 MB → 285 KB) with no extension and no template change. Set it in `additional.php`:
 
