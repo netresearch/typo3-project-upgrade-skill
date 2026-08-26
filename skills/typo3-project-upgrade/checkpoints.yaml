@@ -4,6 +4,11 @@
 version: 1
 skill_id: typo3-project-upgrade
 
+preconditions:
+  - type: command
+    pattern: "grep -qE '\\\"type\\\"[[:space:]]*:[[:space:]]*\\\"(project|typo3-cms-project)\\\"' composer.json"
+    desc: "composer type:project — these checks audit a site/project repo, not an extension"
+
 mechanical:
   # === SITE SET CHECKS ===
   - id: TPU-01
