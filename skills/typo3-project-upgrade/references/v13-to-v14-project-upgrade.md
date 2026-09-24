@@ -140,7 +140,7 @@ New opt-in required:
 
 ```bash
 # FE render: assert a marker only your sitepackage emits, not status + <title>
-curl -s https://site/ | grep -c 'class="page-content"'
+curl -fsS https://site/ | grep -c 'class="page-content"'
 # BE login
 curl -si https://site/typo3/ | head -5
 # Processed images exist
@@ -153,13 +153,14 @@ ddev mysql -e "SELECT uid, pid, title FROM sys_template WHERE root=1 AND deleted
 ```
 
 "HTTP 200 + a non-empty `<title>`" does not prove the sitepackage rendered.
-TYPO3's setup creates default rendering that answers 200 with the page title
-and a welcome message: a root `sys_template` "Main TypoScript Rendering"
-(`clear=3`, its own `page = PAGE`) on 13.4 and 14.0, a
-`config/sites/<identifier>/setup.typoscript` with `page = PAGE` on 14.3. If the
-setup ever ran against the instance, check both places before trusting the
-render. Replace `page-content` above with a class, id or skip link from your
-own layout.
+The TYPO3 installer (`typo3 setup` or the web installer) creates a site with
+default rendering that answers 200 with the page title and a welcome message:
+a root `sys_template` "Main TypoScript Rendering" (`clear=3`, its own
+`page = PAGE`) on 13.4 and 14.0, a
+`config/sites/<identifier>/setup.typoscript` with `page = PAGE` on 14.3. If
+the installer ever ran against the instance, check both places before
+trusting the render. Replace `page-content` above with a class, id or skip
+link from your own layout.
 
 A database kept in a bind-mounted host directory survives
 `docker compose down -v`: the flag removes named and anonymous volumes, not
