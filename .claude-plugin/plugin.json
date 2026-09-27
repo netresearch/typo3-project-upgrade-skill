@@ -1,6 +1,6 @@
 {
   "name": "typo3-project-upgrade",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Skill for upgrading deployed TYPO3 project instances across major LTS versions",
   "author": {
     "name": "Netresearch DTT GmbH",
