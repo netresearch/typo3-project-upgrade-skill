@@ -1,4 +1,6 @@
 ---
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 name: typo3-project-upgrade
 description: "Use when upgrading a deployed TYPO3 project/instance to a new LTS version (v14.3 LTS is the current target, released 2026-04-21) — migrating site configuration, TypoScript, templates, Docker infrastructure, and database. Includes #109585 post-upgrade wizard and Camino theme migration. Not for extension code upgrades (use typo3-extension-upgrade instead)."
 ---

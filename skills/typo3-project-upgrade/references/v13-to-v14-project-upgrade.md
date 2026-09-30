@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # TYPO3 v13 → v14.3 LTS — Project (Instance) Upgrade Playbook
 
 **Release:** v14.3 LTS, 2026-04-21. **Free support:** bugfix until 2027-12-31, security until 2029-06-30.

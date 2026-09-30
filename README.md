@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # TYPO3 Project Upgrade Skill
 
 Claude Code skill for upgrading deployed TYPO3 project instances across major LTS versions.
