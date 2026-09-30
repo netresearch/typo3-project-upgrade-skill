@@ -20,13 +20,16 @@ This skill covers **project-level** upgrades — the deployed website, its confi
 
 ### Claude Code (marketplace)
 
+Add the [Netresearch marketplace](https://github.com/netresearch/claude-code-marketplace) once, then install the skill:
+
 ```bash
-claude mcp add typo3-project-upgrade -- npx @anthropic-ai/claude-code-marketplace typo3-project-upgrade
+/plugin marketplace add netresearch/claude-code-marketplace
+/plugin install typo3-project-upgrade@netresearch-claude-code-marketplace
 ```
 
 ### Manual
 
-Copy `skills/typo3-project-upgrade/SKILL.md` to your Claude Code skills directory.
+Copy the directory `skills/typo3-project-upgrade/` (`SKILL.md` and `references/`) to your Claude Code skills directory.
 
 ## Assessment Checkpoints
 
