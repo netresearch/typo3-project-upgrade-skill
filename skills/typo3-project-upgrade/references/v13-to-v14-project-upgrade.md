@@ -90,6 +90,7 @@ If the v13 site already uses Site Sets, no changes needed. Site configurations a
 ### HMAC rotation (#106307)
 
 HMAC algorithm strengthened SHA1 → SHA256 family. Invalidates any HMACs persisted before the upgrade:
+
 - One-time tokens (e.g. password-reset tokens, form tokens)
 - Signed serialized payloads in custom extensions
 

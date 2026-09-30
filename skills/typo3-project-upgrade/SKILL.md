@@ -49,6 +49,7 @@ Replace per-page sys_templates with TypoScript conditions: `[traverse(page, "uid
 **Color contrast**: `min-contrast-ratio: 4.5` (BS5 default) changes text colors vs v11. Set to `3` to restore v11 behavior.
 
 **Cards in colored frames** inherit white text (invisible on white bg). Fix with CSS custom properties:
+
 ```css
 .frame-background-secondary .card {
     --frame-color: var(--bs-body-color);
