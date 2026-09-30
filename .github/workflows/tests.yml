@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
+
+name: Skill Tests
+
+# Runs this repo's tests (tests/*.sh) via the skill-repo-skill reusable:
+# tests/checkpoints.sh executes the command checkpoints in
+# skills/typo3-project-upgrade/checkpoints.yaml against fixture projects. The
+# other workflows validate structure, lint and security; none of them runs a
+# checkpoint. Not part of the central skill template, so it carries its own
+# notice.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+jobs:
+  tests:
+    uses: netresearch/skill-repo-skill/.github/workflows/tests.yml@main
+    permissions:
+      contents: read
