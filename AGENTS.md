@@ -14,6 +14,7 @@ Extension *code* upgrades are a different skill — see `typo3-extension-upgrade
 │   └── references/
 │       └── v13-to-v14-project-upgrade.md          # The v13 → v14.3 procedure
 ├── tests/checkpoints.sh                           # Runs the command checkpoints on fixtures
+├── docs/SECURITY-ASSURANCE.md                     # Security assurance case
 ├── .claude-plugin/plugin.json                     # Plugin manifest
 ├── plugin.json                                    # Portable manifest, source of the version
 ├── composer.json                                  # Packagist distribution
@@ -62,3 +63,4 @@ project.
 - What the skill does and when it triggers → `skills/typo3-project-upgrade/SKILL.md`
 - The actual upgrade procedure → `skills/typo3-project-upgrade/references/v13-to-v14-project-upgrade.md`
 - What CI enforces → `.github/workflows/` and `skills/typo3-project-upgrade/checkpoints.yaml`
+- Threats, trust boundaries and limits → [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md)
