@@ -150,7 +150,10 @@ ls public/fileadmin/_processed_/ | wc -l
 grep -ic deprecat var/log/typo3_*.log
 
 # DB: no leftover sys_template root=1 records
-ddev mysql -e "SELECT uid, pid, title FROM sys_template WHERE root=1 AND deleted=0"  # or: mysql -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} -e '...'
+ddev mysql -e "SELECT uid, pid, title FROM sys_template WHERE root=1 AND deleted=0"
+# without DDEV: read user and password from an option file, not from -p on the
+# command line, where the process list and the shell history expose them
+mysql --defaults-extra-file=/path/to/client.cnf ${DB_NAME} -e '...'
 ```
 
 "HTTP 200 + a non-empty `<title>`" does not prove the sitepackage rendered.
@@ -174,7 +177,7 @@ run the `sys_template` query again instead of assuming a clean database.
 |---|---|---|
 | **v14.3 LTS** (today's cutover target) | 2027-12-31 | 2029-06-30 |
 | v13 LTS | 2027-10-31 (approx.) | +ELTS |
-| v12 LTS | **2026-04-30** (imminent) | +ELTS |
+| v12 LTS | 2026-04-30 (ended) | +ELTS |
 | v11.5 | 2024-10 (ended) | +ELTS 2028-10-31 |
 
 **Do not upgrade a production site to v14.0/14.1/14.2 in the sprint window** — those releases lost support when 14.3 shipped.
