@@ -96,7 +96,7 @@ Checks that run on pull requests in this repository:
 
 - Every pull request: Skill Validation (`lint.yml`: skill structure, manifest sync, markdownlint of the root Markdown files, yamllint, actionlint, JSON syntax, ShellCheck, ruff, checkpoint schemas), Eval Validation (`eval-validate.yml`) Skill Tests (`tests.yml`) and the Labeler (`labeler.yml`); the CodeRabbit review and the Copilot code review that the repository ruleset requests.
 - Pull requests to `main`: `security.yml` with Composer Audit, SAST (Opengrep, `--config auto`; which findings fail the check is set by the [organisation rule](https://github.com/netresearch/.github/blob/main/SECURITY.md#static-analysis-sast)), Betterleaks secret scanning, zizmor and dependency review (`fail-on-severity: high`); Harness Verification (`harness-verify.yml`); Template Drift (`check-template-drift.yml`); CodeQL analysis of the GitHub Actions workflows through GitHub's default setup (`Analyze (actions)`) and the DCO sign-off check.
-- Required for merging into `main`: Skill Validation, Eval Validation, Composer Audit, SAST (Opengrep), Secret Scanning (Betterleaks), `Analyze (actions)` and DCO. GitHub secret scanning with push protection is enabled for the repository.
+- Required for merging into `main`: Skill Validation, Eval Validation, Skill Tests, Composer Audit, SAST (Opengrep), Secret Scanning (Betterleaks), `Analyze (actions)` and DCO. GitHub secret scanning with push protection is enabled for the repository.
 - Static-analysis exceptions: `labeler.yml` and `auto-merge-deps.yml` (both from the central skill template) each suppress the zizmor finding `dangerous-triggers` inline, with the reason in the comment above it. No other exception is recorded.
 
 ## License
