@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
+#
 # Checkpoints for typo3-project-upgrade skill
 # Validates TYPO3 project upgrade completeness and correctness
 
@@ -13,13 +16,13 @@ mechanical:
   # === SITE SET CHECKS ===
   - id: TPU-01
     type: command
-    target: "find . -path '*/Configuration/Sets/*/config.yaml' | head -1 | grep -q ."
+    target: "find . -path '*/Configuration/Sets/*/config.yaml' -not -path '*/vendor/*' -not -path '*/node_modules/*' -not -path '*/.Build/*' | head -1 | grep -q ."
     severity: error
     desc: "Project must have at least one Site Set (Configuration/Sets/*/config.yaml)"
 
   - id: TPU-02
     type: command
-    target: "find config/sites -name 'config.yaml' -exec grep -l 'dependencies' {} \\;"
+    target: "grep -rq --include=config.yaml '^dependencies:' config/sites"
     severity: error
     desc: "Site configuration must reference site set via dependencies"
 
@@ -33,7 +36,7 @@ mechanical:
   # === SYS_TEMPLATE CLEANUP ===
   - id: TPU-04
     type: command
-    target: "grep -rq 'DELETE FROM sys_template' docker/ || grep -rq 'TRUNCATE.*sys_template' docker/"
+    target: "grep -rqE 'DELETE FROM sys_template|TRUNCATE.*sys_template' docker/"
     severity: warning
     desc: "Docker entrypoint should clean up legacy sys_template records"
 
@@ -53,14 +56,14 @@ mechanical:
   # === SCSS OVER CSS ===
   - id: TPU-07
     type: command
-    target: "! grep -rq '!important' packages/*/Configuration/Sets/*/setup.typoscript 2>/dev/null || test $? -eq 1"
+    target: "! grep -q '!important' packages/*/Configuration/Sets/*/setup.typoscript 2>/dev/null"
     severity: info
     desc: "Prefer SCSS variables over CSS !important overrides in setup.typoscript"
 
   # === BOOTSTRAP PACKAGE DEPENDENCIES ===
   - id: TPU-08
     type: command
-    target: "find . -path '*/Configuration/Sets/*/config.yaml' -exec grep -l 'bootstrap-package' {} \\;"
+    target: "find . -path '*/Configuration/Sets/*/config.yaml' -not -path '*/vendor/*' -not -path '*/node_modules/*' -not -path '*/.Build/*' -print0 | xargs -0 grep -q 'bootstrap-package'"
     severity: warning
     desc: "Site set should declare bootstrap-package dependency"
 

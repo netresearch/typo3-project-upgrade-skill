@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # AGENTS.md — TYPO3 Project Upgrade Skill
 
 Upgrading a **deployed TYPO3 instance** across major LTS versions: site
@@ -13,25 +16,37 @@ Extension *code* upgrades are a different skill — see `typo3-extension-upgrade
 │   ├── evals/evals.json                           # Behavioural evals
 │   └── references/
 │       └── v13-to-v14-project-upgrade.md          # The v13 → v14.3 procedure
+├── tests/checkpoints.sh                           # Runs the command checkpoints on fixtures
+├── docs/SECURITY-ASSURANCE.md                     # Security assurance case
 ├── .claude-plugin/plugin.json                     # Plugin manifest
+├── plugin.json                                    # Portable manifest, source of the version
 ├── composer.json                                  # Packagist distribution
 └── README.md
 ```
 
 ## Commands
 
-No Makefile and no build step — this repo is documentation plus metadata.
+No Makefile and no build step — this repo is documentation plus metadata,
+and checkpoint commands that an assessment runner executes in the assessed
+project.
 
 - `pre-commit run --all-files` — the full local gate (yamllint, markdownlint,
   skill validation, version parity)
+- `bash tests/checkpoints.sh` — runs every command checkpoint against fixture
+  projects (needs `yq` v4); CI runs it in Skill Tests (`tests.yml`)
 - CI runs the same checks through the shared reusables in `.github/workflows/`
 
 ## Conventions
 
-- `SKILL.md` has a hard **500-word cap**, counted over the whole file including
-  frontmatter. Detail belongs in `references/`, not in the skill body.
-- The version in `.claude-plugin/plugin.json`, `composer.json` and `SKILL.md`
-  metadata must match; CI fails on drift.
+- `validate-skill.sh` fails a `SKILL.md` body (after the frontmatter) over
+  500 lines and warns past 300. Detail belongs in `references/`, not in the
+  skill body.
+- The version lives in `plugin.json` and `.claude-plugin/plugin.json`, which
+  must match (CI: `sync-plugin-manifest.sh --check`); `composer.json` must not
+  carry one, the Git tag is its version (pre-commit: `check-version-parity`).
+- A command checkpoint must be able to fail and must pass the assessment
+  runner's allowlist: no `||`, `&&`, `;`, `find -exec` or `$(`. Add fixture
+  verdicts for a new checkpoint to `tests/checkpoints.sh`.
 - Split licensing: MIT for code, CC-BY-SA-4.0 for prose. Both LICENSE files
   stay in place.
 - Shared workflows come from `netresearch/.github/templates/skill` and are
@@ -51,3 +66,4 @@ No Makefile and no build step — this repo is documentation plus metadata.
 - What the skill does and when it triggers → `skills/typo3-project-upgrade/SKILL.md`
 - The actual upgrade procedure → `skills/typo3-project-upgrade/references/v13-to-v14-project-upgrade.md`
 - What CI enforces → `.github/workflows/` and `skills/typo3-project-upgrade/checkpoints.yaml`
+- Threats, trust boundaries and limits → [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md)

@@ -1,4 +1,6 @@
 ---
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 name: typo3-project-upgrade
 description: "Use when upgrading a deployed TYPO3 project/instance to a new LTS version (v14.3 LTS is the current target, released 2026-04-21) — migrating site configuration, TypoScript, templates, Docker infrastructure, and database. Includes #109585 post-upgrade wizard and Camino theme migration. Not for extension code upgrades (use typo3-extension-upgrade instead)."
 ---
@@ -49,6 +51,7 @@ Replace per-page sys_templates with TypoScript conditions: `[traverse(page, "uid
 **Color contrast**: `min-contrast-ratio: 4.5` (BS5 default) changes text colors vs v11. Set to `3` to restore v11 behavior.
 
 **Cards in colored frames** inherit white text (invisible on white bg). Fix with CSS custom properties:
+
 ```css
 .frame-background-secondary .card {
     --frame-color: var(--bs-body-color);
