@@ -39,7 +39,7 @@ The repository contains no program, runs no server and stores no data. Its execu
 
 | Threat | Countermeasure | Evidence |
 | --- | --- | --- |
-| A checkpoint changes or deletes files in the assessed project | Every command is a `grep` or `find` pipeline without `-exec`, `-delete` or an output redirection other than `2>/dev/null`; `tests/checkpoints.sh` rejects the constructs the runner refuses | `skills/typo3-project-upgrade/checkpoints.yaml`, `tests/checkpoints.sh` |
+| A checkpoint changes or deletes files in the assessed project | Every command is a `grep` or `find` pipeline without `-exec`, `-delete` or an output redirection other than `2>/dev/null`; `tests/checkpoints.sh` rejects `||`, `&&`, `;`, backticks, `$(` and `exec`, the chaining constructs the runner refuses; the runner's own allowlist refuses more | `skills/typo3-project-upgrade/checkpoints.yaml`, `tests/checkpoints.sh` |
 | A checkpoint never runs, or passes on every project, and an incomplete upgrade is reported as complete | `tests/checkpoints.sh` runs each command checkpoint against a compliant and a non-compliant fixture project and fails when a verdict is wrong or when a checkpoint has no expected verdict; Skill Tests runs it on every pull request | `tests/checkpoints.sh`, `.github/workflows/tests.yml` |
 | Site sets of installed packages satisfy the site-set checks (TPU-01, TPU-08) | Both commands skip `vendor/`, `node_modules/` and `.Build/`; a fixture with site sets only under those directories must fail them | `checkpoints.yaml`, `tests/checkpoints.sh` |
 | The checkpoints run against a TYPO3 extension and report meaningless findings | The precondition requires `"type": "project"` or `"typo3-cms-project"` in `composer.json` | `checkpoints.yaml`, `tests/checkpoints.sh` |
@@ -52,7 +52,7 @@ The repository contains no program, runs no server and stores no data. Its execu
 | A release is built from a forged tag or with a version that disagrees with `plugin.json` | The release reusable accepts only annotated tags that GitHub reports as signed, and fails when the tag differs from `.claude-plugin/plugin.json`; the `Immutable tags` ruleset is active | `.github/workflows/release.yml`; repository rulesets, read 2026-09-30 |
 | A released archive is tampered with | The release reusable publishes a Cosign-signed (keyless) `SHA256SUMS.txt` and build-provenance attestations for the archives | `.github/workflows/release.yml` |
 
-No static-analysis exception is recorded in this repository.
+The only static-analysis exceptions are two inline zizmor suppressions of `dangerous-triggers` in `.github/workflows/labeler.yml` and `.github/workflows/auto-merge-deps.yml` (central skill template), each with its reason in the comment above it.
 
 ## Secure design principles applied
 
@@ -70,6 +70,6 @@ The repository ships no executable input-handling code. The checkpoint commands 
 - The skill gives guidance; it does not enforce it. Its instructions include destructive statements — `DELETE FROM sys_template`, `TRUNCATE sys_file_processedfile`, `rm -rf public/fileadmin/_processed_/*` — that run with the rights of whoever executes them, and the skill contains no backup step. Take a backup of the database and `fileadmin/` first.
 - A passing checkpoint run is not proof of a correct upgrade. The mechanical checks look for files and strings; the `llm_reviews` answers come from a language model reading the assessed project, whose content can steer that model.
 - The command allowlist that stops a checkpoint from running arbitrary commands belongs to the runner. A runner without such a list executes whatever `checkpoints.yaml` contains.
-- Branch protection requires no approving review, and repository administrators are exempt from it. Skill Tests, Harness Verification, Template Drift, zizmor and dependency review run on pull requests but are not required checks (repository settings, read 2026-09-30).
+- Branch protection requires no approving review, and repository administrators are exempt from it. Skill Tests, Harness Verification, Template Drift, zizmor, dependency review, the Labeler, the CodeRabbit review and the Copilot code review run on pull requests but are not required checks (repository settings, read 2026-09-30).
 - The reusable workflows are referenced at `@main` of `netresearch/skill-repo-skill`, `netresearch/.github` and `netresearch/typo3-ci-workflows`, so a change there applies here without a change in this repository.
 - Security fixes follow the supported-versions rules of the organisation's security policy; older releases may not receive them.
