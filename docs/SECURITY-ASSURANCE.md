@@ -15,7 +15,7 @@ This document states what a user can expect from this repository in terms of sec
 | Package metadata | `composer.json`, `plugin.json`, `.claude-plugin/plugin.json` | Read by Composer and by Claude Code when the skill is installed. |
 | Repository tooling | `.github/workflows/*.yml`, `tests/checkpoints.sh`, `.pre-commit-config.yaml` | In this repository's CI and on contributors' machines. |
 
-The repository contains no program, runs no server and stores no data. Its executable content is the seven `type: command` checkpoints and the precondition in `checkpoints.yaml`.
+The installable skill contains no program, runs no server and stores no data; its executable content is the seven `type: command` checkpoints and the precondition in `checkpoints.yaml`. The repository also holds tooling that runs only in its own CI and on contributors' machines: `tests/checkpoints.sh`, which reads `checkpoints.yaml` with yq and runs those commands against fixture projects it creates in a temporary directory.
 
 ## Security requirements
 
