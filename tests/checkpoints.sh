@@ -8,9 +8,11 @@
 # and fail on one that does not. A command that exits 0 either way can never
 # report a finding, so it fails this test.
 #
-# It also rejects the constructs the assessment runner refuses to execute
-# (automated-assessment-skill, scripts/lib/command-allowlist.sh): a refused
-# command is reported as "blocked" and never runs.
+# It also rejects the command chaining and `exec` that the assessment runner
+# refuses to execute (automated-assessment-skill,
+# scripts/lib/command-allowlist.sh): a refused command is reported as
+# "blocked" and never runs. The runner's allowlist refuses more than this
+# check does, so passing it does not prove the runner accepts a command.
 #
 # The commands run the way the runner runs them: `bash <<<"$cmd"` from the
 # project root. Needs bash and yq (mikefarah, v4).
@@ -75,8 +77,9 @@ printf '{"name": "acme/ext", "type": "typo3-cms-extension"}\n' > "$TMP/extension
 
 # --- expected verdicts --------------------------------------------------------
 
-# "<id> <fixture>" -> pass | fail. Every command checkpoint needs a "good" row,
-# so a checkpoint added without a test fails the coverage check below.
+# "<id> <fixture>" -> pass | fail. Every command checkpoint needs a "good" row
+# that passes and at least one row that fails, so a checkpoint added without
+# both fails the coverage check below.
 declare -A EXPECT=(
     ["TPU-01 good"]=pass ["TPU-01 bad"]=pass ["TPU-01 vendor"]=fail
     ["TPU-02 good"]=pass ["TPU-02 bad"]=fail
@@ -108,17 +111,17 @@ refused() {
 }
 
 check() {
-    local id=$1 cmd=$2 key fixture want got seen=0
+    local id=$1 cmd=$2 key fixture want got fails=0
     if refused "$cmd"; then
-        not_ok "$id allowed by the runner" "no ||, &&, ;, backtick, \$( or exec" "$cmd"
+        not_ok "$id has no chaining or exec" "no ||, &&, ;, backtick, \$( or exec" "$cmd"
     else
-        ok "$id allowed by the runner"
+        ok "$id has no chaining or exec"
     fi
     for key in "${!EXPECT[@]}"; do
         [[ "$key" == "$id "* ]] || continue
-        seen=1
         fixture=${key#"$id "}
         want=${EXPECT[$key]}
+        [[ "$want" == fail ]] && fails=$((fails + 1))
         got=$(verdict "$TMP/$fixture" "$cmd")
         if [[ "$got" == "$want" ]]; then
             ok "$id $want on $fixture"
@@ -126,8 +129,11 @@ check() {
             not_ok "$id on $fixture" "$want" "$got"
         fi
     done
-    if [[ $seen -eq 0 ]]; then
-        not_ok "$id has expected verdicts in tests/checkpoints.sh" "at least one row" "none"
+    if [[ "${EXPECT["$id good"]:-}" != pass ]]; then
+        not_ok "$id has a passing \"good\" row in tests/checkpoints.sh" "pass" "${EXPECT["$id good"]:-none}"
+    fi
+    if [[ $fails -eq 0 ]]; then
+        not_ok "$id has a failing row in tests/checkpoints.sh" "at least one" "none"
     fi
 }
 

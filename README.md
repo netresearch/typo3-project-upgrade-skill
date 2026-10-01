@@ -57,7 +57,7 @@ Real-world migration of [typo3-demo.netresearch.de](https://typo3-demo.netresear
 - a project whose only site sets lie under `vendor/`, `node_modules/` and `.Build/`, on which TPU-01 and TPU-08 must fail;
 - a TYPO3 extension, which the precondition must reject.
 
-It also fails when a command uses a construct the runner refuses (`||`, `&&`, `;`, backticks, `$(`, `exec`), when a command checkpoint has no expected verdict in the test, and when fewer checks ran than expected. The `llm_reviews` prompts, `evals/evals.json` and the prose of the skill have no behavioural test; CI checks their structure.
+It also fails when a command uses a construct the runner refuses (`||`, `&&`, `;`, backticks, `$(`, `exec`), when a command checkpoint lacks a passing verdict on the `good` fixture or a failing verdict on another fixture, and when fewer checks ran than expected. The `llm_reviews` prompts, `evals/evals.json` and the prose of the skill have no behavioural test; CI checks their structure.
 
 Run the tests and the hooks from the repository root; the test needs `bash` and [yq](https://github.com/mikefarah/yq) v4:
 
