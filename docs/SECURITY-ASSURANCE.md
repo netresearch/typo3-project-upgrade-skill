@@ -52,7 +52,7 @@ The installable skill contains no program, runs no server and stores no data; it
 | A release is built from a forged tag or with a version that disagrees with `plugin.json` | The release reusable accepts only annotated tags that GitHub reports as signed, and fails when the tag differs from `.claude-plugin/plugin.json`; the `Immutable tags` ruleset is active | `.github/workflows/release.yml`; repository rulesets, read 2026-09-30 |
 | A released archive is tampered with | The release reusable publishes a Cosign-signed (keyless) `SHA256SUMS.txt` and build-provenance attestations for the archives | `.github/workflows/release.yml` |
 
-The only static-analysis exceptions are two inline zizmor suppressions of `dangerous-triggers` in `.github/workflows/labeler.yml` and `.github/workflows/auto-merge-deps.yml` (central skill template), each with its reason in the comment above it.
+The only static-analysis exceptions are two inline zizmor suppressions of `dangerous-triggers` in `.github/workflows/labeler.yml` and `.github/workflows/auto-merge-deps.yml` (central skill template), each with its reason in the comment above it, and one inline ShellCheck suppression of SC2016 in `tests/checkpoints.sh`, with its reason beside it.
 
 ## Secure design principles applied
 

@@ -57,7 +57,7 @@ Real-world migration of [typo3-demo.netresearch.de](https://typo3-demo.netresear
 - a project whose only site sets lie under `vendor/`, `node_modules/` and `.Build/`, on which TPU-01 and TPU-08 must fail;
 - a TYPO3 extension, which the precondition must reject.
 
-It also fails when a command uses a construct the runner refuses (`||`, `&&`, `;`, backticks, `$(`, `exec`), when a command checkpoint lacks a passing verdict on the `good` fixture or a failing verdict on another fixture, and when fewer checks ran than expected. The `llm_reviews` prompts, `evals/evals.json` and the prose of the skill have no behavioural test; CI checks their structure.
+It also fails when a command uses a construct the runner refuses (`||`, `&&`, `;`, backticks, `$(`, `exec`; the runner's allowlist refuses more than this test checks), when a command checkpoint lacks a passing verdict on the `good` fixture or a failing verdict on another fixture, and when fewer checks ran than expected. The `llm_reviews` prompts, `evals/evals.json` and the prose of the skill have no behavioural test; CI checks their structure.
 
 Run the tests and the hooks from the repository root; the test needs `bash` and [yq](https://github.com/mikefarah/yq) v4:
 
@@ -94,10 +94,10 @@ The security assurance case for this skill and its checkpoints (threat model, tr
 
 Checks that run on pull requests in this repository:
 
-- Every pull request: Skill Validation (`lint.yml`: skill structure, manifest sync, markdownlint of the root Markdown files, yamllint, actionlint, JSON syntax, ShellCheck, ruff, checkpoint schemas), Eval Validation (`eval-validate.yml`) Skill Tests (`tests.yml`) and the Labeler (`labeler.yml`); the CodeRabbit review and the Copilot code review that the repository ruleset requests.
+- Every pull request: Skill Validation (`lint.yml`: skill structure, manifest sync, markdownlint of the root Markdown files, yamllint, actionlint, JSON syntax, ShellCheck, ruff, checkpoint schemas), Eval Validation (`eval-validate.yml`), Skill Tests (`tests.yml`) and the Labeler (`labeler.yml`); on pull requests to `main` that are not drafts, also the CodeRabbit review and the Copilot code review that the repository ruleset requests.
 - Pull requests to `main`: `security.yml` with Composer Audit, SAST (Opengrep, `--config auto`; which findings fail the check is set by the [organisation rule](https://github.com/netresearch/.github/blob/main/SECURITY.md#static-analysis-sast)), Betterleaks secret scanning, zizmor and dependency review (`fail-on-severity: high`); Harness Verification (`harness-verify.yml`); Template Drift (`check-template-drift.yml`); CodeQL analysis of the GitHub Actions workflows through GitHub's default setup (`Analyze (actions)`) and the DCO sign-off check.
 - Required for merging into `main`: Skill Validation, Eval Validation, Skill Tests, Composer Audit, SAST (Opengrep), Secret Scanning (Betterleaks), `Analyze (actions)` and DCO. GitHub secret scanning with push protection is enabled for the repository.
-- Static-analysis exceptions: `labeler.yml` and `auto-merge-deps.yml` (both from the central skill template) each suppress the zizmor finding `dangerous-triggers` inline, with the reason in the comment above it. No other exception is recorded.
+- Static-analysis exceptions: `labeler.yml` and `auto-merge-deps.yml` (both from the central skill template) each suppress the zizmor finding `dangerous-triggers` inline, with the reason in the comment above it, and `tests/checkpoints.sh` suppresses ShellCheck SC2016 on one line, with the reason beside it. No other exception is recorded.
 
 ## License
 
