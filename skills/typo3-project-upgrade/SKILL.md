@@ -89,3 +89,4 @@ See `references/v13-to-v14-project-upgrade.md`.
 | Missing ImageMagick in Docker | 10-30x image file sizes |
 | Fighting BS5 accessibility | Accept split nav, skip links, semantic HTML |
 | position:fixed for scroll flicker | Use margin-bottom compensation |
+| Hot-fixing a `Services.yaml` / constructor change by copying vendor files | `composer update <package>` + `typo3 extension:setup` (reference § 2) |
