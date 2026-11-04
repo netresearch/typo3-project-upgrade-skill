@@ -107,6 +107,8 @@ Since 14.2 EXT:form stores forms in the database, and file mount storage is depr
 
 Cause, read in 14.3.10: listing the forms goes through the Extbase ConfigurationManager, which needs a server request. The CLI has none, so the ConfigurationManager throws `NoServerRequestGivenException`. `FileFormsToDatabaseUpgradeWizard::getFileBasedForms()` catches every exception, logs the warning "Could not list file-based forms" and returns an empty list, so `updateNecessary()` returns false. `TransferFormDefinitionCommand::execute()` builds a request itself for exactly this reason (see its `@todo`).
 
+Before you migrate, check whether file mounts separate forms by backend user group. Database storage does not keep that isolation: it relies on table permissions, so every backend user with access to `form_definition` sees all database-stored forms. The changelog of #108653 recommends not migrating such an installation until a dedicated access control exists.
+
 Fix: run the wizard from the backend, or migrate with the transfer command, which works on the CLI:
 
 ```bash
@@ -116,7 +118,7 @@ vendor/bin/typo3 form:definition:transfer --source=filemount --target=database -
 vendor/bin/typo3 form:definition:transfer --source=filemount --target=database --move -f <identifier>
 ```
 
-Run the move once per identifier. The wizard skips a form whose identifier already exists in the database. The transfer command does not skip it: it stores a second copy as `<identifier>_1`. Check the Reports module afterwards; it shows the upgrade as complete once no file-based form is left.
+Run the move once per identifier. The wizard skips a form whose identifier already exists in the database. The transfer command does not skip it: it stores a second copy as `<identifier>_1`. The command rewrites the form references in `tt_content` only; it updates no other table. Before `--move` deletes the YAML files, search your own tables and extensions for stored persistence identifiers (`1:/forms/…`). Check the Reports module afterward. It shows the upgrade as complete once no file-based form is left.
 
 ## 6. Frontend theme migration (optional)
 
