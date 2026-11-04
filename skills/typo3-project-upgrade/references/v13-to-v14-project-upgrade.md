@@ -43,21 +43,20 @@ composer update -W --with-all-dependencies
 
 ### Deploying an extension change to the running instance
 
-**A DI change is never hot-fixed by copying vendor files.** Copying changed files into `vendor/` and running `typo3 cache:flush` is survivable for a code-only change (a method body, a constant). It is not for a change that adds a service definition or a constructor argument (`Configuration/Services.yaml` plus a class constructor): the compiled container no longer matches the code, every request returns a tiny error body, and `typo3 cache:flush` prints its usage instead of running, because the console cannot build the container either. Recovery is copying the original files back (`git show origin/main:<file>`) and flushing again. Deploy such a change the regular way: merge it, `composer update <package>` on the instance, then `typo3 extension:setup` and `typo3 cache:flush`. `extension:setup` boots the full container, so a broken definition fails there instead of in the frontend. Prove the change before the merge with the extension's test suite, not on the instance.
+**A DI change is never hot-fixed by copying vendor files.** Copying changed files into `vendor/` and running `typo3 cache:flush` is survivable for a code-only change (a method body, a constant). It is not for a change that adds a service definition or a constructor argument (`Configuration/Services.yaml` plus a class constructor): the compiled container no longer matches the code, every request returns a tiny error body, and `typo3 cache:flush` prints its usage instead of running, because the console cannot build the container either. Recovery is copying the original files back (from the extension's repository, `git show <installed ref>:<file>`, or from the released package of the installed version) and flushing again. Deploy such a change the regular way: merge it, `composer update <package>` on the instance, then `typo3 extension:setup` and `typo3 cache:flush`. `extension:setup` boots the full container, so a broken definition fails there instead of in the frontend. Prove the change before the merge with the extension's test suite, not on the instance.
 
-**Running composer when the runtime image has none.** Use a build image with composer and git against the same app volume. For private VCS repositories over SSH, forward the agent socket into the container. If the image's entrypoint drops to the web user, that user cannot open a socket owned by your host uid (`Permission denied (publickey)`); run composer as root with the entrypoint overridden instead:
+**Running composer when the runtime image has none.** Use a build image with composer and git against the same app volume, run as root with the entrypoint overridden when the image's entrypoint drops to the web user:
 
 ```bash
 docker run --rm -u 0 --entrypoint composer \
   -v <app-volume>:/var/www -w /var/www \
-  -v "$SSH_AUTH_SOCK":/ssh-agent -e SSH_AUTH_SOCK=/ssh-agent \
-  -e COMPOSER_HOME=/tmp/composer -e COMPOSER_ALLOW_SUPERUSER=1 -e HOME=/root \
-  -e GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new" \
+  -e COMPOSER_HOME=/tmp/composer -e COMPOSER_ALLOW_SUPERUSER=1 \
   -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0='*' \
   <build-image> update <vendor/package> --with-all-dependencies --no-interaction --dry-run
 ```
 
-- `--dry-run` first; add `--ignore-platform-req=ext-…` only for extensions the build image lacks but the runtime image has.
+- Do not mount an SSH agent socket, a key or a token into that container to reach private VCS repositories: whatever runs in it, package code included, can use the credential. Resolve private dependencies where the credential already lives, in the CI or build pipeline that produces `composer.lock` and `vendor/`, and deploy that result.
+- `--dry-run` first, then the same command without it: the dry run changes neither `vendor/` nor `composer.lock`. Add `--ignore-platform-req=ext-…` only for extensions the build image lacks but the runtime image has.
 - `safe.directory` avoids git's "dubious ownership" refusal on vendor checkouts owned by the app user.
 - Composer as root writes root-owned files: afterwards `find /var/www -user 0 -exec chown <app-uid>:<app-gid> {} +`, then run `extension:setup`, `database:updateschema` and `cache:flush` as the web user.
 - A source-installed package with an earlier on-instance hotfix blocks the update (`VcsDownloader … Source directory … has uncommitted changes`). Diff the hotfix against the target ref first; only when the target already contains it, discard it with `git checkout -- <file>` inside that vendor directory, in the same container run as the update.
