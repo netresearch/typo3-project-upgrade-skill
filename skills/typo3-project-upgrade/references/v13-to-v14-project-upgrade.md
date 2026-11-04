@@ -78,7 +78,7 @@ If the v13 site already uses Site Sets, no changes needed. Site configurations a
 - **`typo3/install.php` removed** — integrated into backend routing (#107536). Existing bookmarks pointing at `/typo3/install.php` need updating to the new backend path. BC is maintained via redirect for most setups.
 - **`install:password:set`** CLI (Feature #104058) — unattended install admin password rotation.
 
-## 5. Post-upgrade security wizards
+## 5. Post-upgrade wizards
 
 ### Important #109585 — serialized credential data
 
@@ -98,6 +98,25 @@ HMAC algorithm strengthened SHA1 → SHA256 family. Invalidates any HMACs persis
 - Signed serialized payloads in custom extensions
 
 Action: force regeneration at next use (or flush proactively if safe).
+
+### EXT:form: file-based forms move to the database (#108653)
+
+Since 14.2 EXT:form stores forms in the database, and file mount storage is deprecated. The upgrade wizard `formFileFormsToDatabaseMigration` moves the YAML forms from the file mounts into the database and rewrites the `tt_content` references.
+
+**The wizard is invisible on the command line.** `vendor/bin/typo3 upgrade:list` does not list it, and `upgrade:run` finds nothing to do. The backend still shows it as pending: Reports says the upgrade is incomplete, and Install Tool → Upgrade Wizards lists it. A scripted upgrade therefore leaves the forms in the file mounts without any error.
+
+Cause, read in 14.3.10: listing the forms goes through the Extbase ConfigurationManager, which needs a server request. The CLI has none, so the ConfigurationManager throws `NoServerRequestGivenException`. `FileFormsToDatabaseUpgradeWizard::getFileBasedForms()` catches every exception, logs the warning "Could not list file-based forms" and returns an empty list, so `updateNecessary()` returns false. `TransferFormDefinitionCommand::execute()` builds a request itself for exactly this reason (see its `@todo`).
+
+Fix: run the wizard from the backend, or migrate with the transfer command, which works on the CLI:
+
+```bash
+# list what would move
+vendor/bin/typo3 form:definition:transfer --source=filemount --target=database --dry-run
+# move one form; repeat per identifier
+vendor/bin/typo3 form:definition:transfer --source=filemount --target=database --move -f <identifier>
+```
+
+Run the move once per identifier. The wizard skips a form whose identifier already exists in the database. The transfer command does not skip it: it stores a second copy as `<identifier>_1`. Check the Reports module afterwards; it shows the upgrade as complete once no file-based form is left.
 
 ## 6. Frontend theme migration (optional)
 
@@ -191,6 +210,7 @@ run the `sys_template` query again instead of assuming a clean database.
 
 - [TYPO3 Core Changelog 14.x](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog-14.html)
 - [Important #109585 — Serialized credential data](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.3/Important-109585-SerializedCredentialDataInBeUsersDatabaseTable.html)
+- [Feature #108653 — Database storage for EXT:form](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.2/Feature-108653-DatabaseStorageForFormExtension.html)
 - [Deprecation #109438 — ext_tables.php](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.3/Deprecation-109438-ExtTablesPhpInExtensions.html)
 - [Feature #108539 — Camino default theme](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.1/Feature-108539-Default-Theme-Camino.html)
 - [Important #107536 — Install Tool backend routing](https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.0/Important-107536-InstallToolNowAdaptsToBackendLoginRouting.html)
