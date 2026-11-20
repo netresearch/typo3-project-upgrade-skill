@@ -50,7 +50,7 @@ jq -r --arg old "$old" '."require-dev" // {} | to_entries[]
 composer update -W --with-all-dependencies
 ```
 
-- Raise **all** `typo3/cms-*` constraints that follow the core line, not `typo3/cms-core` alone. A project requires 20 to 30 of them; the ones left behind keep resolving to a line that gets no more fixes, and the file reads as if the mix were deliberate.
+- Raise **all** `typo3/cms-*` constraints that follow the core line, not `typo3/cms-core` alone; a project requires 20 to 30 of them. Every core-line package requires `typo3/cms-core` at exactly its own version (`typo3/cms-backend` 13.4.20 requires `typo3/cms-core` 13.4.20), so one package left on `^13.4` makes step 3 fail with a dependency conflict. On a later minor raise (`^14.0` to `^14.3`) the leftovers still resolve, but the file then states a floor the project no longer supports.
 - Step 2 selects by the **current value**, not by the name, so packages with their own version line stay untouched: `typo3/cms-introduction`, `typo3/cms-cli`, `typo3/cms-composer-installers`. If step 1 shows core-line packages on a different value (`^13.4.10`, `13.4.*`), run step 2 again with that value as `old`.
 - Run step 1 again before committing: no package that follows the core line may still show the old value.
 
