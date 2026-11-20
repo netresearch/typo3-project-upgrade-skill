@@ -33,10 +33,26 @@ If you use Netresearch's `support-typo3-14-t3re` runtime image, rebuild it again
 ## 2. composer upgrade
 
 ```bash
-# Bump the core constraint
-composer require --no-update typo3/cms-core:^14.3
+# 1. Group every typo3/cms-* (and typo3/minimal) constraint by its current value
+jq -r '(.require // {}), (."require-dev" // {}) | to_entries[]
+  | select(.key | startswith("typo3/cms-") or . == "typo3/minimal") | "\(.value) \(.key)"' composer.json | sort
+
+# 2. Raise every package on the old core line in one go
+old='^13.4'; new='^14.3'
+jq -r --arg old "$old" '.require // {} | to_entries[]
+  | select((.key | startswith("typo3/cms-") or . == "typo3/minimal") and .value == $old) | .key' composer.json \
+  | sed "s/\$/:$new/" | xargs -r composer require --no-update
+jq -r --arg old "$old" '."require-dev" // {} | to_entries[]
+  | select((.key | startswith("typo3/cms-") or . == "typo3/minimal") and .value == $old) | .key' composer.json \
+  | sed "s/\$/:$new/" | xargs -r composer require --dev --no-update
+
+# 3. Resolve
 composer update -W --with-all-dependencies
 ```
+
+- Raise **all** `typo3/cms-*` constraints that follow the core line, not `typo3/cms-core` alone; a project requires 20 to 30 of them. The metapackage `typo3/minimal` follows the core line too, and a project that requires only it would otherwise stay on v13. Every core-line package requires `typo3/cms-core` at exactly its own version (`typo3/cms-backend` 13.4.20 requires `typo3/cms-core` 13.4.20), so one package left on `^13.4` makes step 3 fail with a dependency conflict. On a later minor raise (`^14.0` to `^14.3`) the leftovers still resolve, but the file then states a floor the project no longer supports.
+- Step 2 selects by the **current value**, not by the name, so packages with their own version line stay untouched: `typo3/cms-introduction`, `typo3/cms-cli`, `typo3/cms-composer-installers`. If step 1 shows core-line packages on a different value (`^13.4.10`, `13.4.*`), run step 2 again with that value as `old`.
+- Run step 1 again before committing: no package that follows the core line may still show the old value.
 
 - v14 requires a `composer.json` in classic mode (#108310). Composer projects already have one.
 - `ext_emconf.php` is deprecated for extension metadata (#108345) — not your concern here, but any local extension with only `ext_emconf.php` should be flagged to the extension team.
