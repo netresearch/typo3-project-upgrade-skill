@@ -59,7 +59,7 @@
   },
   {
     "name": "scss_variables_over_css",
-    "prompt": "I need to change the primary color to #585961 and secondary to #2f99a4 in my TYPO3 v14 Bootstrap Package site. Should I use CSS overrides?",
+    "prompt": "I need to change the primary color to #334155 and secondary to #b45309 in my TYPO3 v14 Bootstrap Package site. Should I use CSS overrides?",
     "assertions": [
       {
         "type": "content",
