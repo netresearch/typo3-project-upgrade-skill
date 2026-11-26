@@ -34,8 +34,8 @@ Structure: `packages/my-site/Configuration/Sets/MySite/` with config.yaml, setti
 BS Package injects ALL `plugin.bootstrap_package.settings.scss.*` as SCSS variables — even unlisted ones. Prefer over CSS overrides:
 
 ```yaml
-plugin.bootstrap_package.settings.scss.primary: '#585961'
-plugin.bootstrap_package.settings.scss.secondary: '#2f99a4'
+plugin.bootstrap_package.settings.scss.primary: '#334155'
+plugin.bootstrap_package.settings.scss.secondary: '#b45309'
 plugin.bootstrap_package.settings.scss.link-decoration: 'none'
 plugin.bootstrap_package.settings.scss.min-contrast-ratio: '3'
 ```
